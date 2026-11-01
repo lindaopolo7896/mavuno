@@ -1,16 +1,15 @@
-package com.example.mavuno.navigation
+package com.example.mavuno.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.mavuno.screens.auth.ForgotScreen
-import com.example.mavuno.screens.auth.LoginScreen
-import com.example.mavuno.screens.auth.ResetScreen
-import com.example.mavuno.screens.auth.SignupScreen
-import com.example.mavuno.screens.auth.SplashScreen
-import com.example.mavuno.screens.auth.VerifyScreen
-import com.example.mavuno.screens.dashboard.HomeScreen
+import com.example.mavuno.ui.screens.auth.ForgotScreen
+import com.example.mavuno.ui.screens.auth.LoginScreen
+import com.example.mavuno.ui.screens.auth.ResetScreen
+import com.example.mavuno.ui.screens.auth.SignupScreen
+import com.example.mavuno.ui.screens.auth.SplashScreen
+import com.example.mavuno.ui.screens.auth.VerifyScreen
 
 @Composable
 fun AppNavigation(){
@@ -38,8 +37,8 @@ composable("splash"){
         composable("reset"){
             ResetScreen(navController)
         }
-        composable("home"){
-            HomeScreen(navController)
+        composable("main") {
+            MainNavigation()
         }
     }
 }

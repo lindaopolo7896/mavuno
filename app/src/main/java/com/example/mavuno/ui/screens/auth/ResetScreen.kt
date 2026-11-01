@@ -1,4 +1,4 @@
-package com.example.mavuno.screens.auth
+package com.example.mavuno.ui.screens.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,15 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.mavuno.components.AuthBtn
-import com.example.mavuno.components.AuthHeader
-import com.example.mavuno.components.AuthNav
-import com.example.mavuno.components.Input
+import com.example.mavuno.ui.components.AuthHeader
+import com.example.mavuno.ui.components.Btn
+import com.example.mavuno.ui.components.Input
 
 @Composable
-fun SignupScreen(navController: NavHostController){
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+fun ResetScreen(navController: NavHostController){
     var password by remember { mutableStateOf("") }
     var confirmPass by remember { mutableStateOf("") }
 
@@ -51,28 +48,12 @@ fun SignupScreen(navController: NavHostController){
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
-            AuthHeader("Create an Account","Already have an account?", signup = true,navController)
+            AuthHeader("Setup a new password","Your new password must be different from previously used passwords",false,navController)
             Spacer(modifier = Modifier.height(30.dp))
-            AuthNav(login = false, register = true,navController)
-            Spacer(modifier = Modifier.height(20.dp))
-            Input(
-                "FullName",
-                value = name,
-                onValueChange = {name = it},
-                placeholder = "Enter your full name"
 
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Input(
-                "Email",
-                value = email,
-                onValueChange = {email = it},
-                placeholder = "Enter your email"
 
-            )
-            Spacer(modifier = Modifier.height(20.dp))
             Input(
-                label = "Password",
+                label = "New Password",
                 value=password,
                 onValueChange = {password = it},
                 placeholder = "Setup your password",
@@ -86,12 +67,15 @@ fun SignupScreen(navController: NavHostController){
                 placeholder = "Confirm your password",
                 isPassword = true
             )
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+            Btn(onClick = { navController.navigate("signin") }, "Confirm",)
 
 
 
 
-            AuthBtn(onClick = {navController.navigate("home")},"Create Account",)
+
+
+
 
 
         }

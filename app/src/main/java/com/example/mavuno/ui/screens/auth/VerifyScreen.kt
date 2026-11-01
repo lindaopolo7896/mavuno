@@ -1,4 +1,4 @@
-package com.example.mavuno.screens.auth
+package com.example.mavuno.ui.screens.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,8 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.mavuno.R
-import com.example.mavuno.components.AuthHeader
-import com.example.mavuno.components.Btn
+import com.example.mavuno.ui.components.AuthHeader
+import com.example.mavuno.ui.components.Btn
 
 @Composable
 fun VerifyScreen(navController: NavHostController) {

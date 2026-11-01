@@ -1,4 +1,4 @@
-package com.example.mavuno.screens.auth
+package com.example.mavuno.ui.screens.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,10 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.mavuno.components.AuthBtn
-import com.example.mavuno.components.AuthHeader
-import com.example.mavuno.components.AuthNav
-import com.example.mavuno.components.Input
+import com.example.mavuno.ui.components.AuthBtn
+import com.example.mavuno.ui.components.AuthHeader
+import com.example.mavuno.ui.components.AuthNav
+import com.example.mavuno.ui.components.Input
 
 @Composable
 fun LoginScreen(navController: NavHostController){
@@ -93,7 +93,7 @@ fun LoginScreen(navController: NavHostController){
 
 
 
-            AuthBtn(onClick = {navController.navigate("home")},"Login",)
+            AuthBtn(onClick = {navController.navigate("main")},"Login",)
             Spacer(modifier = Modifier.height(30.dp))
 
             Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {

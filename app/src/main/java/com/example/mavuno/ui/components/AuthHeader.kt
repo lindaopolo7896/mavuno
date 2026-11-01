@@ -1,4 +1,4 @@
-package com.example.mavuno.components
+package com.example.mavuno.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

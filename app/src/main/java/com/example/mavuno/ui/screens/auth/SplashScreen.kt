@@ -1,4 +1,4 @@
-package com.example.mavuno.screens.auth
+package com.example.mavuno.ui.screens.auth
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.mavuno.R
 
 @Composable
 fun SplashScreen(navController: NavHostController){
@@ -42,7 +44,7 @@ fun SplashScreen(navController: NavHostController){
             .fillMaxSize()
     ){
         Image(
-            painter = painterResource(com.example.mavuno.R.drawable.back),
+            painter = painterResource(R.drawable.back),
             contentDescription = "farmers",
             modifier = Modifier
                 .fillMaxSize(),
@@ -79,6 +81,7 @@ fun SplashScreen(navController: NavHostController){
             Text(
                 "AI-Powered Detection for Healthier Crops and Better Harvests",
                 fontSize = 24.sp,
+                color = Color.Black,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
                 )
@@ -108,7 +111,7 @@ color = Color.Black.copy(alpha=0.73f),
                         .fillMaxWidth(0.4f)
                         .height(47.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor =Color(0xff014844)
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Text("Get Started", color = Color.White)

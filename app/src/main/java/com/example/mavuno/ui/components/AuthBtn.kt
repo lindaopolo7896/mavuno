@@ -1,4 +1,4 @@
-package com.example.mavuno.components
+package com.example.mavuno.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mavuno.R
 
 @Composable
 fun AuthBtn(
@@ -40,7 +42,7 @@ fun AuthBtn(
                 .height(50.dp)
                 .fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xff014844)
+                containerColor = MaterialTheme.colorScheme.primary
             )
 
         ) {
@@ -75,7 +77,7 @@ fun AuthBtn(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(com.example.mavuno.R.drawable.google),
+                        painter = painterResource(R.drawable.google),
                         contentDescription = "google icon",
                         modifier = Modifier.size(24.dp),
                         contentScale = ContentScale.Crop
@@ -97,7 +99,7 @@ fun AuthBtn(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(com.example.mavuno.R.drawable.apple),
+                        painter = painterResource(R.drawable.apple),
                         contentDescription = "apple icon",
                         modifier = Modifier.size(24.dp),
                         contentScale = ContentScale.Crop

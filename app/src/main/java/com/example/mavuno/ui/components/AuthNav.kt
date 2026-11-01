@@ -1,4 +1,4 @@
-package com.example.mavuno.components
+package com.example.mavuno.ui.components
 
 import android.R
 import androidx.compose.foundation.layout.Row
