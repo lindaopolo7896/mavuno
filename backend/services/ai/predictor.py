@@ -61,6 +61,8 @@ def _load_model():
             path = Path(settings.AI_MODEL_PATH)
             if not path.is_file():
                 raise ModelNotAvailable(f"Model file not found at {path}. Set AI_MODEL_PATH in .env.")
+            if settings.AI_TORCH_THREADS:
+                torch.set_num_threads(settings.AI_TORCH_THREADS)
             model = models.resnet18(weights=None)                 # step 1: empty ResNet18
             model.fc = nn.Linear(model.fc.in_features, len(CLASSES))
             state = torch.load(path, map_location="cpu", weights_only=True)

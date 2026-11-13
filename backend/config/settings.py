@@ -91,6 +91,12 @@ SERVE_MEDIA = env.bool("SERVE_MEDIA", default=False)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# URL prefix of the Django admin, e.g. "netler/".
+ADMIN_URL = env("ADMIN_URL", default="admin/").strip("/") + "/"
+
+# File cache so throttle counters are shared by all gunicorn workers.
+CACHES = {"default": env.cache("CACHE_URL", default=f"filecache://{BASE_DIR / '.cache'}")}
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -100,6 +106,9 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
+    # Number of reverse proxies in front of the app; used to read the client IP from
+    # X-Forwarded-For for throttling. 0 = use the direct connection's IP.
+    "NUM_PROXIES": env.int("NUM_PROXIES", default=0 if DEBUG else 1),
     "DEFAULT_THROTTLE_RATES": {
         # Limits login/register attempts per IP to slow down password guessing.
         "auth": env("AUTH_THROTTLE_RATE", default="10/min"),
@@ -121,6 +130,8 @@ AI_MODEL_PATH = BASE_DIR / env("AI_MODEL_PATH", default="ml_models/resnet18_fina
 AI_CONFIDENCE_THRESHOLD = env.float("AI_CONFIDENCE_THRESHOLD", default=0.8)
 AI_TOP_K = env.int("AI_TOP_K", default=3)
 AI_MAX_UPLOAD_MB = env.int("AI_MAX_UPLOAD_MB", default=10)
+# CPU threads PyTorch uses per worker process. 0 = PyTorch default (all cores).
+AI_TORCH_THREADS = env.int("AI_TORCH_THREADS", default=0)
 
 # HTTPS / security. Active when DEBUG=False.
 if not DEBUG:

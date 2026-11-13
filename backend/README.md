@@ -77,12 +77,15 @@ uv run python manage.py predict path/to/leaf.jpg
 | `CSRF_TRUSTED_ORIGINS` | empty | Required for `/admin/` login over HTTPS, e.g. `https://api.example.com` |
 | `DATABASE_URL` | `sqlite:///db.sqlite3` | Postgres: `postgres://user:pass@host:5432/mavuno` |
 | `TIME_ZONE` | `UTC` | |
+| `ADMIN_URL` | `admin/` | Django admin URL prefix |
+| `CACHE_URL` | `filecache://backend/.cache` | Shared by all workers (throttle counters) |
 | `MEDIA_URL` / `MEDIA_ROOT` | `/media/` / `backend/media` | Scan photo storage |
 | `SERVE_MEDIA` | `False` | `True`: Django serves `MEDIA_ROOT`. Always on when `DEBUG=True` |
 | `PAGE_SIZE` | `20` | Scan history page size |
 | `JWT_ACCESS_TOKEN_MINUTES` | `30` | |
 | `JWT_REFRESH_TOKEN_DAYS` | `30` | |
 | `AUTH_THROTTLE_RATE` | `10/min` | Login/register attempts per IP |
+| `NUM_PROXIES` | `1` (`0` when `DEBUG=True`) | Reverse proxies in front of the app; client IP is read from `X-Forwarded-For` |
 | `SECURE_SSL_REDIRECT` | `True` | When `DEBUG=False` |
 | `SECURE_HSTS_SECONDS` | `31536000` | When `DEBUG=False` |
 | `SECURE_HSTS_INCLUDE_SUBDOMAINS` | `True` | When `DEBUG=False` |
@@ -91,3 +94,4 @@ uv run python manage.py predict path/to/leaf.jpg
 | `AI_CONFIDENCE_THRESHOLD` | `0.8` | 0–1 |
 | `AI_TOP_K` | `3` | Predictions returned and stored per scan |
 | `AI_MAX_UPLOAD_MB` | `10` | Max photo size |
+| `AI_TORCH_THREADS` | `0` | CPU threads per worker; `0` = all cores |
