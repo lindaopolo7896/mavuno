@@ -1,4 +1,5 @@
-from rest_framework import mixins, status, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from services import scans as scan_service
 from services.ai import InvalidImage, ModelNotAvailable
 
+from .filters import ScanFilter
 from .serializers import PredictScanSerializer, ScanSerializer
 
 
@@ -20,6 +22,9 @@ class ScanViewSet(
 
     serializer_class = ScanSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_class = ScanFilter
+    search_fields = ["plant_name", "disease"]
 
     def get_queryset(self):
         return scan_service.get_user_scans(self.request.user)
