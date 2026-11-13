@@ -13,7 +13,7 @@ Base URL: `https://<host>/api/v1/`. Locally: `http://10.0.2.2:8000/api/v1/` from
 - [Errors](#errors)
 - [Auth endpoints](#auth-endpoints): register, login, refresh, logout
 - [Profile](#profile): get, update, delete account
-- [Scans](#scans): diagnose a photo, history, detail, delete
+- [Scans](#scans): diagnose a photo, history (with filters), detail, delete
 
 ## Authentication
 
@@ -250,6 +250,26 @@ Raspberry, Soybean, Squash, Strawberry, Tomato.
 ```
 
 `next` is `null` on the last page. Only the authenticated user's scans are returned.
+
+**Filters** (optional, combinable with each other and with `page`):
+
+| Param | Example | Matches |
+|---|---|---|
+| `is_healthy` | `true` / `false` | Healthy or diseased scans |
+| `plant` | `Tomato` | Exact plant name, case-insensitive |
+| `search` | `blight` | Text in `plant_name` or `disease`, case-insensitive |
+| `scanned_from` | `2026-11-01` | `scanned_at` on or after this date |
+| `scanned_to` | `2026-11-30` | `scanned_at` on or before this date |
+
+Dates are `YYYY-MM-DD`, compared in the server's time zone (`Africa/Nairobi`).
+`count`, `next` and `previous` reflect the filtered results, and `next`/`previous` keep the filter params.
+
+```
+GET /scans/?is_healthy=false&scanned_from=2026-11-01&page=2
+```
+
+**Errors:** `400` for invalid values, e.g. `{"scanned_from": ["Enter a valid date."]}` or
+`{"is_healthy": ["Select a valid choice. maybe is not one of the available choices."]}`.
 
 ### Scan detail
 
