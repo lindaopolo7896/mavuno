@@ -36,8 +36,22 @@ class ScanSerializer(serializers.ModelSerializer):
             "confidence",
             "is_healthy",
             "predictions",
-            "recommendation",
             "scanned_at",
             "created_at",
         )
         read_only_fields = ("id", "created_at")
+
+
+class PredictScanSerializer(serializers.Serializer):
+    """Upload for POST /scans/predict/."""
+
+    image = serializers.ImageField()
+    scanned_at = serializers.DateTimeField(required=False)
+
+    def validate_image(self, image):
+        from django.conf import settings
+
+        limit = settings.AI_MAX_UPLOAD_MB * 1024 * 1024
+        if image.size > limit:
+            raise serializers.ValidationError(f"Image must be {settings.AI_MAX_UPLOAD_MB} MB or smaller.")
+        return image

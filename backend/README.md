@@ -1,97 +1,93 @@
 # Mavuno Backend
 
-Django + Django REST Framework API for the Mavuno mobile app (plant disease scanning).
-Auth uses JWT (access + refresh tokens). Dependencies are managed with [uv](https://docs.astral.sh/uv/).
+Django + Django REST Framework API for the Mavuno mobile app. A leaf photo is diagnosed by a
+ResNet18 model and each result is saved to the user's scan history.
+
+- Auth: JWT (access + refresh tokens)
+- AI: ResNet18 trained on PlantVillage (38 classes, 14 crops), run on CPU with PyTorch
+- Dependencies: [uv](https://docs.astral.sh/uv/)
+- API reference: [api.md](api.md)
 
 ## Project layout
 
 ```
 backend/
-├── apps/           # Django apps (models, admin, migrations)
-│   ├── users/      # Custom User (email login)
-│   └── scans/      # Scan results
-├── config/         # settings, root urls, wsgi/asgi
+├── apps/              # Django apps (models, admin, migrations)
+│   ├── users/         # Custom User (email login)
+│   └── scans/         # Scan results; `predict` management command
+├── config/            # settings, root urls, wsgi/asgi
 ├── api/
-│   └── v1/         # versioned API, grouped like the apps
-│       ├── users/  # auth + profile views, serializers, urls
-│       └── scans/  # scan history views, serializers, urls
-├── services/       # business logic used by the views
+│   └── v1/            # versioned API, grouped like the apps
+│       ├── users/     # auth + profile views, serializers, urls
+│       └── scans/     # scan + predict views, serializers, urls
+├── services/          # business logic used by the views
+│   └── ai/            # model loading, preprocessing, class list
+├── ml_models/         # resnet18_final.pt (not tracked in git)
 ├── manage.py
 ├── pyproject.toml / uv.lock
 └── .env.example
 ```
 
-To add `v2`, create `api/v2/` with the same structure and register it in `api/urls.py`.
+New API versions go in `api/v2/`, `api/v3/`, ... with the same structure, registered in `api/urls.py`.
 
 ## Setup
 
 ```bash
 cd backend
-uv sync                      # creates .venv and installs dependencies
-cp .env.example .env         # then set SECRET_KEY (command is in the file)
+uv sync
+cp .env.example .env
 uv run python manage.py migrate
-uv run python manage.py createsuperuser   # optional, for /admin/
+uv run python manage.py createsuperuser
 uv run python manage.py runserver 0.0.0.0:8000
 ```
 
-The Android emulator reaches your computer at `http://10.0.2.2:8000`. On a physical phone,
-use your computer's LAN IP and add it to `ALLOWED_HOSTS` in `.env`.
+`SECRET_KEY` in `.env` must be set. A key can be generated with:
+
+```bash
+uv run python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
+```
+
+## AI model
+
+| File | Purpose |
+|---|---|
+| `ml_models/resnet18_final.pt` | Trained weights (state dict, ~45 MB) from `ResNet18_Base.ipynb` |
+| `services/ai/classes.py` | The 38 classes, in the order the model outputs them |
+| `services/ai/predictor.py` | Loads the model once per process, preprocesses photos, runs inference |
+
+Preprocessing matches `eval_transform` from training: resize to 224×224, then ImageNet
+normalisation. PyTorch is installed CPU-only (`[tool.uv.sources]` in `pyproject.toml`).
+
+Predictions below `AI_CONFIDENCE_THRESHOLD` are rejected with `422` and not saved. The model
+always returns one of its 38 classes, so the threshold is what filters out unrelated photos.
+
+Running the model on image files directly:
+
+```bash
+uv run python manage.py predict path/to/leaf.jpg
+```
 
 ## Configuration (.env)
 
 | Variable | Default | Notes |
 |---|---|---|
-| `SECRET_KEY` | — (required) | |
-| `DEBUG` | `False` | Media files are only served by Django when `True` |
+| `SECRET_KEY` | required | |
+| `DEBUG` | `False` | |
 | `ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma separated |
-| `CSRF_TRUSTED_ORIGINS` | empty | Only needed for the admin behind a domain |
-| `DATABASE_URL` | `sqlite:///db.sqlite3` | For Postgres: `postgres://user:pass@host:5432/mavuno` (also run `uv add "psycopg[binary]"`) |
+| `CSRF_TRUSTED_ORIGINS` | empty | Required for `/admin/` login over HTTPS, e.g. `https://api.example.com` |
+| `DATABASE_URL` | `sqlite:///db.sqlite3` | Postgres: `postgres://user:pass@host:5432/mavuno` |
 | `TIME_ZONE` | `UTC` | |
-| `MEDIA_URL` / `MEDIA_ROOT` | `/media/` / `backend/media` | Where scan images are stored |
+| `MEDIA_URL` / `MEDIA_ROOT` | `/media/` / `backend/media` | Scan photo storage |
+| `SERVE_MEDIA` | `False` | `True`: Django serves `MEDIA_ROOT`. Always on when `DEBUG=True` |
 | `PAGE_SIZE` | `20` | Scan history page size |
 | `JWT_ACCESS_TOKEN_MINUTES` | `30` | |
 | `JWT_REFRESH_TOKEN_DAYS` | `30` | |
-
-## API (v1)
-
-All endpoints except register, login and refresh need `Authorization: Bearer <access token>`.
-
-| Method | Path | Body | Response |
-|---|---|---|---|
-| POST | `/api/v1/auth/register/` | `email`, `password`, `full_name`?, `phone_number`? | `201` `{user, access, refresh}` |
-| POST | `/api/v1/auth/login/` | `email`, `password` | `200` `{user, access, refresh}` |
-| POST | `/api/v1/auth/token/refresh/` | `refresh` | `200` `{access, refresh}` (new refresh token each time) |
-| POST | `/api/v1/auth/logout/` | `refresh` | `204` (refresh token is blacklisted) |
-| GET | `/api/v1/users/me/` | | `200` profile |
-| PATCH | `/api/v1/users/me/` | `full_name`, `phone_number` | `200` profile |
-| DELETE | `/api/v1/users/me/` | | `204` account and all scans deleted |
-| POST | `/api/v1/scans/` | see below | `201` scan |
-| GET | `/api/v1/scans/?page=1` | | `200` `{count, next, previous, results}`, newest first |
-| GET | `/api/v1/scans/<id>/` | | `200` scan |
-| DELETE | `/api/v1/scans/<id>/` | | `204` |
-
-### Scan fields
-
-All fields are optional when saving a scan.
-
-| Field | Type | Notes |
-|---|---|---|
-| `image` | file | Send as `multipart/form-data` |
-| `plant_name` | string | |
-| `disease` | string | Top predicted disease |
-| `confidence` | float 0–1 | Confidence of the top prediction |
-| `is_healthy` | bool | |
-| `predictions` | list | `[{"label": "Leaf rust", "confidence": 0.91}, ...]`. In multipart requests, send it as a JSON string |
-| `recommendation` | string | Treatment / care advice |
-| `scanned_at` | ISO datetime | When the photo was taken; defaults to now |
-
-Read-only: `id` (UUID), `created_at`.
-
-Example (JSON, no image):
-
-```bash
-curl -X POST http://localhost:8000/api/v1/scans/ \
-  -H "Authorization: Bearer $ACCESS" -H "Content-Type: application/json" \
-  -d '{"plant_name":"Maize","disease":"Northern leaf blight","confidence":0.93,
-       "predictions":[{"label":"Northern leaf blight","confidence":0.93}]}'
-```
+| `AUTH_THROTTLE_RATE` | `10/min` | Login/register attempts per IP |
+| `SECURE_SSL_REDIRECT` | `True` | When `DEBUG=False` |
+| `SECURE_HSTS_SECONDS` | `31536000` | When `DEBUG=False` |
+| `SECURE_HSTS_INCLUDE_SUBDOMAINS` | `True` | When `DEBUG=False` |
+| `LOG_LEVEL` | `INFO` | |
+| `AI_MODEL_PATH` | `ml_models/resnet18_final.pt` | Relative to `backend/` |
+| `AI_CONFIDENCE_THRESHOLD` | `0.8` | 0–1 |
+| `AI_TOP_K` | `3` | Predictions returned and stored per scan |
+| `AI_MAX_UPLOAD_MB` | `10` | Max photo size |

@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -77,9 +78,16 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
 
 MEDIA_URL = env("MEDIA_URL", default="/media/")
 MEDIA_ROOT = env.path("MEDIA_ROOT", default=BASE_DIR / "media")
+# Serve uploaded scan photos through Django. Off by default: nginx serves MEDIA_ROOT.
+# Always on when DEBUG=True.
+SERVE_MEDIA = env.bool("SERVE_MEDIA", default=False)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -92,6 +100,10 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": env.int("PAGE_SIZE", default=20),
+    "DEFAULT_THROTTLE_RATES": {
+        # Limits login/register attempts per IP to slow down password guessing.
+        "auth": env("AUTH_THROTTLE_RATE", default="10/min"),
+    },
 }
 
 SIMPLE_JWT = {
@@ -101,4 +113,29 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# AI model (see services/ai/)
+# Relative paths are resolved from the backend folder.
+AI_MODEL_PATH = BASE_DIR / env("AI_MODEL_PATH", default="ml_models/resnet18_final.pt")
+AI_CONFIDENCE_THRESHOLD = env.float("AI_CONFIDENCE_THRESHOLD", default=0.8)
+AI_TOP_K = env.int("AI_TOP_K", default=3)
+AI_MAX_UPLOAD_MB = env.int("AI_MAX_UPLOAD_MB", default=10)
+
+# HTTPS / security. Active when DEBUG=False.
+if not DEBUG:
+    # nginx terminates HTTPS and passes the original scheme in this header.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=31536000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
+    SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
 }
