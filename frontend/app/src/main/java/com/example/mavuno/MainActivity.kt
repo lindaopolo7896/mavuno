@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.mavuno.data.remote.RetrofitClient
 import com.example.mavuno.ui.navigation.AppNavigation
 import com.example.mavuno.ui.theme.MavunoTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        RetrofitClient.init(applicationContext)
         enableEdgeToEdge()
         setContent {
             MavunoTheme {

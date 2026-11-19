@@ -1,31 +1,32 @@
 package com.example.mavuno.ui.screens.auth
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,76 +36,73 @@ import com.example.mavuno.R
 import com.example.mavuno.ui.components.AuthHeader
 import com.example.mavuno.ui.components.Btn
 import com.example.mavuno.ui.components.Input
+import com.example.mavuno.ui.theme.CropTheme
 
 @Composable
-fun ForgotScreen(navController: NavHostController){
-    var email by remember { mutableStateOf("") }
+fun ForgotScreen(navController: NavHostController) {
+    var email by rememberSaveable { mutableStateOf("") }
 
-
-
-
-
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(20.dp)
-            .background(Color(0xffF8FDF6))
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
+            .imePadding(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(32.dp))
 
-    ){
+        Image(
+            painter = painterResource(R.drawable.forgot),
+            contentDescription = "Forgot password illustration",
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.Fit
+        )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Spacer(modifier = Modifier.height(20.dp))
 
+        AuthHeader(
+            "Forgot Password",
+            "Please enter the email associated with your account",
+            false,
+            navController
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Input(
+            "Email",
+            value = email,
+            onValueChange = { email = it },
+            placeholder = "Enter your email"
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Btn(onClick = { navController.navigate("verify") }, "Send Code")
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
         ) {
-
-            Image(
-                painter = painterResource(R.drawable.forgot),
-                contentDescription = "farmers",
-
-                contentScale = ContentScale.Crop)
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            AuthHeader("Forgot Password","Please enter the email associated with your account",false,navController)
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Input(
-                "Email",
-                value = email,
-                onValueChange = {email = it},
-                placeholder = "Enter your email"
-
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Arrow Back",
+                tint = CropTheme.colors.tag
             )
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-
-
-            Btn(onClick = {navController.navigate("verify")},"Send Code",)
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-               Icon(
-                   imageVector = Icons.Default.ArrowBack,
-                   contentDescription = "Arrow Back",
-                   tint = Color.Black.copy(alpha = 0.63f)
-               )
-
-                Text(
-                    "Back to Login",
-                    color = Color.Black.copy(alpha = 0.63f),
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.clickable(onClick = {navController.navigate("signin")})
-                        .padding(horizontal = 5.dp))
-
-
-            }
-
+            Text(
+                "Back to Login",
+                color = CropTheme.colors.tag,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .clickable(onClick = { navController.navigate("signin") })
+                    .padding(horizontal = 5.dp)
+            )
         }
 
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
