@@ -21,7 +21,17 @@ class Command(BaseCommand):
                 continue
 
             verdict = "healthy" if result.is_healthy else result.disease
-            flag = "" if result.is_confident else "  (low confidence, would ask for a retake)"
-            self.stdout.write(self.style.SUCCESS(f"{path}: {result.plant_name} - {verdict} ({result.confidence:.1%}){flag}"))
+            line = f"{path}: {result.plant_name} - {verdict} ({result.confidence:.1%})"
+            if result.is_accepted:
+                self.stdout.write(self.style.SUCCESS(line))
+            else:
+                self.stdout.write(self.style.WARNING(f"{line}  REJECTED: {result.rejection}, would ask for a retake"))
+            details = []
+            if result.not_a_leaf_confidence is not None:
+                details.append(f"not a leaf {result.not_a_leaf_confidence:.1%}")
+            if result.similarity is not None:
+                details.append(f"similarity {result.similarity:.3f}")
+            if details:
+                self.stdout.write("    " + ", ".join(details))
             for p in result.top:
                 self.stdout.write(f"    {p['confidence']:7.2%}  {p['label']}")
