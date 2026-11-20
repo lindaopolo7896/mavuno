@@ -22,7 +22,7 @@ backend/
 │       └── scans/     # scan + predict views, serializers, urls
 ├── services/          # business logic used by the views
 │   └── ai/            # model loading, preprocessing, class list
-├── ml_models/         # resnet18_final.pt (not tracked in git)
+├── ml_models/         # resnet18_v2.pt + resnet18_v2_check.pt (not tracked in git)
 ├── manage.py
 ├── pyproject.toml / uv.lock
 └── .env.example
@@ -51,15 +51,26 @@ uv run python -c "from django.core.management.utils import get_random_secret_key
 
 | File | Purpose |
 |---|---|
-| `ml_models/resnet18_final.pt` | Trained weights (state dict, ~45 MB) from `ResNet18_Base.ipynb` |
-| `services/ai/classes.py` | The 38 classes, in the order the model outputs them |
-| `services/ai/predictor.py` | Loads the model once per process, preprocesses photos, runs inference |
+| `ml_models/resnet18_v2.pt` | Trained weights (state dict, ~45 MB) from `ResNet18_v2.ipynb`: 38 diseases + `Not_a_leaf` |
+| `ml_models/resnet18_v2_check.pt` | Class averages and cut-off for the similarity check (section 8 of the notebook) |
+| `services/ai/classes.py` | The 39 classes, in the order the model outputs them |
+| `services/ai/predictor.py` | Loads the model once per process, preprocesses photos, runs inference and the checks |
+
+Both files come from the `ResNet18_v2` folder in Google Drive after running the notebook.
 
 Preprocessing matches `eval_transform` from training: resize to 224×224, then ImageNet
 normalisation. PyTorch is installed CPU-only (`[tool.uv.sources]` in `pyproject.toml`).
 
-Predictions below `AI_CONFIDENCE_THRESHOLD` are rejected with `422` and not saved. The model
-always returns one of its 38 classes, so the threshold is what filters out unrelated photos.
+A photo is rejected with `422` and not saved when the first of these checks fails:
+
+| Check | `code` in the response |
+|---|---|
+| The model's top answer is `Not_a_leaf` | `not_a_leaf` |
+| The photo's features are too far from the predicted class's average (similarity check) | `unfamiliar` |
+| The best disease is below `AI_CONFIDENCE_THRESHOLD` | `low_confidence` |
+
+The older 38-class `resnet18_final.pt` still loads. It has no `Not_a_leaf` class and the
+similarity check is skipped for it, so only the confidence threshold applies (use `0.8` with it).
 
 Running the model on image files directly:
 
@@ -90,8 +101,9 @@ uv run python manage.py predict path/to/leaf.jpg
 | `SECURE_HSTS_SECONDS` | `31536000` | When `DEBUG=False` |
 | `SECURE_HSTS_INCLUDE_SUBDOMAINS` | `True` | When `DEBUG=False` |
 | `LOG_LEVEL` | `INFO` | |
-| `AI_MODEL_PATH` | `ml_models/resnet18_final.pt` | Relative to `backend/` |
-| `AI_CONFIDENCE_THRESHOLD` | `0.8` | 0–1 |
+| `AI_MODEL_PATH` | `ml_models/resnet18_v2.pt` | Relative to `backend/` |
+| `AI_CHECK_PATH` | `ml_models/resnet18_v2_check.pt` | Similarity check file; empty turns the check off |
+| `AI_CONFIDENCE_THRESHOLD` | `0.5` | 0–1 |
 | `AI_TOP_K` | `3` | Predictions returned and stored per scan |
 | `AI_MAX_UPLOAD_MB` | `10` | Max photo size |
 | `AI_TORCH_THREADS` | `0` | CPU threads per worker; `0` = all cores |

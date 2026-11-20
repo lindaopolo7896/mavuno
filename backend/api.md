@@ -216,18 +216,24 @@ curl -X POST https://<host>/api/v1/scans/predict/ \
 
 **`201 Created`**: the saved [scan object](#scan-object). It now appears in the history.
 
-**`422 Unprocessable Entity`**: the photo wasn't recognised confidently, e.g. it isn't a leaf or
-it's a crop the model doesn't know. **Nothing is saved.** `predictions` holds the model's top guesses.
+**`422 Unprocessable Entity`**: the photo was rejected. **Nothing is saved.** Show `detail` to the
+user and ask for a new photo. `predictions` holds the model's top disease guesses.
 
 ```json
 {
-  "code": "low_confidence",
-  "detail": "We couldn't identify this plant clearly. Take a close, well-lit photo of a single leaf.",
+  "code": "not_a_leaf",
+  "detail": "This doesn't look like a plant leaf. Take a close photo of a single leaf.",
   "predictions": [
-    { "label": "Corn_(maize)___Common_rust_", "plant_name": "Maize", "disease": "Common rust", "is_healthy": false, "confidence": 0.6147 }
+    { "label": "Corn_(maize)___Common_rust_", "plant_name": "Maize", "disease": "Common rust", "is_healthy": false, "confidence": 0.0412 }
   ]
 }
 ```
+
+| `code` | Meaning |
+|---|---|
+| `not_a_leaf` | The photo isn't a plant leaf |
+| `unfamiliar` | A leaf, but not like any crop the model knows, or a very unusual photo |
+| `low_confidence` | A leaf, but the model isn't sure which disease |
 
 **Other errors:** `400` `{"image": ["Upload a valid image. ..."]}` or `{"image": ["Image must be 10 MB or smaller."]}`, `503`.
 

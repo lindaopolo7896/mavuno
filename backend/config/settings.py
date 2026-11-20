@@ -127,8 +127,11 @@ SIMPLE_JWT = {
 
 # AI model (see services/ai/)
 # Relative paths are resolved from the backend folder.
-AI_MODEL_PATH = BASE_DIR / env("AI_MODEL_PATH", default="ml_models/resnet18_final.pt")
-AI_CONFIDENCE_THRESHOLD = env.float("AI_CONFIDENCE_THRESHOLD", default=0.8)
+AI_MODEL_PATH = BASE_DIR / env("AI_MODEL_PATH", default="ml_models/resnet18_v2.pt")
+# Similarity check from ResNet18_v2.ipynb section 8. Empty disables the check.
+_ai_check = env("AI_CHECK_PATH", default="ml_models/resnet18_v2_check.pt")
+AI_CHECK_PATH = BASE_DIR / _ai_check if _ai_check else None
+AI_CONFIDENCE_THRESHOLD = env.float("AI_CONFIDENCE_THRESHOLD", default=0.5)
 AI_TOP_K = env.int("AI_TOP_K", default=3)
 AI_MAX_UPLOAD_MB = env.int("AI_MAX_UPLOAD_MB", default=10)
 # CPU threads PyTorch uses per worker process. 0 = PyTorch default (all cores).

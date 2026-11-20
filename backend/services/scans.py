@@ -22,14 +22,14 @@ def delete_scan(scan):
 
 
 def predict_and_save_scan(*, user, image, scanned_at=None):
-    """Run the AI on an uploaded photo. Saves a Scan only if the model is confident.
+    """Run the AI on an uploaded photo. Saves a Scan only if the prediction is accepted.
 
-    Returns (prediction, scan). scan is None when the prediction is not confident.
+    Returns (prediction, scan). scan is None when the photo was rejected; prediction.rejection says why.
     """
     from services.ai import predict_image
 
     prediction = predict_image(image)
-    if not prediction.is_confident:
+    if not prediction.is_accepted:
         return prediction, None
 
     image.seek(0)   # the model read the file; rewind so the full image is saved

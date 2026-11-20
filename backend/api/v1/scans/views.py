@@ -5,7 +5,18 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from services import scans as scan_service
-from services.ai import InvalidImage, ModelNotAvailable
+from services.ai import (LOW_CONFIDENCE_REJECTION, NOT_A_LEAF_REJECTION, UNFAMILIAR_REJECTION, InvalidImage,
+                         ModelNotAvailable)
+
+# Message shown to the user for each reason a photo is rejected.
+REJECTION_MESSAGES = {
+    NOT_A_LEAF_REJECTION: "This doesn't look like a plant leaf. Take a close photo of a single leaf.",
+    UNFAMILIAR_REJECTION: (
+        "We couldn't match this photo to a plant we know. Take a close, well-lit photo of a single leaf "
+        "from a supported crop."
+    ),
+    LOW_CONFIDENCE_REJECTION: "We couldn't identify this plant clearly. Take a close, well-lit photo of a single leaf.",
+}
 
 from .filters import ScanFilter
 from .serializers import PredictScanSerializer, ScanSerializer
@@ -57,8 +68,8 @@ class ScanViewSet(
         if scan is None:
             return Response(
                 {
-                    "code": "low_confidence",
-                    "detail": "We couldn't identify this plant clearly. Take a close, well-lit photo of a single leaf.",
+                    "code": prediction.rejection,
+                    "detail": REJECTION_MESSAGES[prediction.rejection],
                     "predictions": prediction.top,
                 },
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY,

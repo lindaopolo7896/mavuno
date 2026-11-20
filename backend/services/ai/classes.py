@@ -1,11 +1,15 @@
-"""The 38 classes the model predicts.
+"""The classes the model predicts.
 
-ORDER MATTERS: the model outputs 38 scores and score i belongs to CLASSES[i].
-This is the training order from ResNet18_Base.ipynb: sorted(color_train["class"].unique()).
+ORDER MATTERS: the model outputs one score per class and score i belongs to CLASSES[i].
+Classes 0-37 are the training order from the notebooks: sorted(color_train["class"].unique()).
+Class 38, Not_a_leaf, exists only in the 39-class model from ResNet18_v2.ipynb. The older
+38-class model (ResNet18_Base.ipynb) uses the first 38 entries.
 Do not reorder or edit this list unless the model is retrained.
 
 Each entry is (label from training, plant name, disease name or None if healthy).
 """
+
+NOT_A_LEAF = "Not_a_leaf"
 
 CLASSES = [
     ("Apple___Apple_scab", "Apple", "Apple scab"),
@@ -46,6 +50,9 @@ CLASSES = [
     ("Tomato___Tomato_Yellow_Leaf_Curl_Virus", "Tomato", "Tomato yellow leaf curl virus"),
     ("Tomato___Tomato_mosaic_virus", "Tomato", "Tomato mosaic virus"),
     ("Tomato___healthy", "Tomato", None),
+    (NOT_A_LEAF, "", ""),
 ]
 
-assert len(CLASSES) == 38
+LEAF_CLASS_COUNT = 38   # classes 0-37 are leaves; Not_a_leaf comes after them
+
+assert len(CLASSES) == LEAF_CLASS_COUNT + 1
