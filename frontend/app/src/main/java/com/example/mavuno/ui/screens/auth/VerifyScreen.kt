@@ -4,130 +4,143 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.mavuno.R
 import com.example.mavuno.ui.components.AuthHeader
 import com.example.mavuno.ui.components.Btn
+import com.example.mavuno.ui.theme.CropTheme
 
 @Composable
 fun VerifyScreen(navController: NavHostController) {
-    var email by remember { mutableStateOf("") }
 
-
-
-
-
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(20.dp)
-            .background(Color(0xffF8FDF6))
-
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState())
+            .imePadding(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Image(
+            painter = painterResource(R.drawable.code),
+            contentDescription = "Verify code illustration",
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.Fit
+        )
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        AuthHeader(
+            "Enter Code",
+            "A code has been sent to your email",
+            false,
+            navController
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // OTP input row — each box is a single numeric character field
+        // heightIn instead of fixed height so the box grows with font scale
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
-            Image(
-                painter = painterResource(R.drawable.code),
-                contentDescription = "farmers",
-
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            AuthHeader(
-                "Enter Code",
-                "A code has been sent to your email",
-                false,
-                navController
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(modifier = Modifier
-                .fillMaxWidth()) {
-                for (i in 0 until 5) {
-                    OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        modifier = Modifier.weight(1f).padding(horizontal = 7.dp)
+            repeat(5) {
+                OutlinedTextField(
+                    value = "",
+                    onValueChange = {},
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        textAlign = TextAlign.Center,
+                        fontSize = androidx.compose.ui.unit.TextUnit(
+                            18f, androidx.compose.ui.unit.TextUnitType.Sp
+                        )
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 56.dp),
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = CropTheme.colors.inputBackground,
+                        focusedContainerColor = CropTheme.colors.inputBackground,
+                        unfocusedTextColor = CropTheme.colors.heading,
+                        focusedTextColor = CropTheme.colors.heading,
+                        unfocusedIndicatorColor = CropTheme.colors.inputBorder,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary
                     )
-                }
+                )
             }
-            Spacer(modifier = Modifier.height(20.dp))
+        }
+        Spacer(modifier = Modifier.height(20.dp))
 
+        Btn(onClick = { navController.navigate("reset") }, "Confirm")
 
+        Spacer(modifier = Modifier.height(20.dp))
 
-
-            Btn(onClick = { navController.navigate("reset") }, "Confirm",)
-
-            Spacer(modifier = Modifier.height(20.dp))
-Row(
-    horizontalArrangement = Arrangement.SpaceBetween,
-    verticalAlignment = Alignment.CenterVertically,
-    modifier = Modifier.fillMaxWidth()
-
-) {
-    Row(
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = Icons.Default.ArrowBack,
-            contentDescription = "Arrow Back",
-            tint = Color.Black.copy(alpha = 0.63f)
-        )
-
-        Text(
-            "Back to Login",
-            color = Color.Black.copy(alpha = 0.63f),
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable(onClick = { navController.navigate("signin") })
-                .padding(horizontal = 5.dp)
-        )
-    }
-    Text(
-        "Request again?",
-        color = Color(0xff014844),
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.clickable(onClick = {})
-    )
-}
-
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Arrow Back",
+                    tint = CropTheme.colors.tag
+                )
+                Text(
+                    "Back to Login",
+                    color = CropTheme.colors.tag,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .clickable(onClick = { navController.navigate("signin") })
+                        .padding(horizontal = 5.dp)
+                )
+            }
+            Text(
+                "Request again?",
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable(onClick = {})
+            )
         }
 
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }

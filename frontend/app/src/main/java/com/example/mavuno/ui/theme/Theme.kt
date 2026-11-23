@@ -12,6 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
@@ -116,15 +119,26 @@ object CropTheme {
         get() = LocalCropSemanticColors.current
 }
 
+object ThemeManager {
+    var selectedTheme by mutableStateOf("System default") // "Light", "Dark", "System default"
+}
+
 @Composable
 fun MavunoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean? = null,
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) DarkColors else LightColors
+    val systemDark = isSystemInDarkTheme()
+    val resolvedDarkTheme = darkTheme ?: when (ThemeManager.selectedTheme) {
+        "Light" -> false
+        "Dark" -> true
+        else -> systemDark
+    }
+
+    val colors = if (resolvedDarkTheme) DarkColors else LightColors
 
     val semanticColors =
-        if (darkTheme) DarkSemanticColors else LightSemanticColors
+        if (resolvedDarkTheme) DarkSemanticColors else LightSemanticColors
 
     CompositionLocalProvider(
         LocalCropSemanticColors provides semanticColors

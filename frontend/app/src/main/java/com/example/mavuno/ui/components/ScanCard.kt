@@ -19,71 +19,94 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.mavuno.ui.theme.CropTheme
 
 @Composable
 fun ScanCard(
-    img:Int,
+    img: Any,
     plantName: String,
-    healthLabel:String,
+    healthLabel: String,
     scanDate: String,
-    status:String,
+    status: String,
     onClick: () -> Unit
-){
+) {
     Row(
-
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .background(CropTheme.colors.inputBackground)
-            .border(0.2.dp, CropTheme.colors.inputBorder.copy(0.3f),
-                RoundedCornerShape(8.dp))
+            .border(
+                0.2.dp,
+                CropTheme.colors.inputBorder.copy(0.3f),
+                RoundedCornerShape(8.dp)
+            )
             .padding(10.dp)
-            .clickable(onClick =onClick)
-        ,
-
+            .clickable(onClick = onClick),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // weight(1f) ensures the left section never pushes the HealthLabel off screen
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
         ) {
-            Image(
-                painter = painterResource(img),
-                contentDescription = "leaf image",
-                modifier = Modifier.size(50.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-
+            if (img is Int) {
+                Image(
+                    painter = painterResource(img),
+                    contentDescription = "Leaf image",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
                 )
+            } else if (img is String) {
+                AsyncImage(
+                    model = img,
+                    contentDescription = "Leaf image",
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
-            Column() {
+            // weight(1f) on the text column so text wraps instead of overflowing
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     plantName,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-                Text(healthLabel,
-                    fontSize = 16.sp)
+                Text(
+                    healthLabel,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CalendarToday,
-                        contentDescription = "Calendar",
+                        contentDescription = "Scan date",
                         modifier = Modifier.size(12.dp)
                     )
-                    Text(scanDate,
-                        fontSize = 14.sp
+                    Text(
+                        scanDate,
+                        fontSize = 13.sp,
+                        maxLines = 1
                     )
                 }
-
-
-
             }
         }
 
