@@ -1,124 +1,195 @@
 # Mavuno 🌱
 
-Mavuno is a student group project exploring how mobile technology can help farmers monitor crop health. The project aims to let users capture or select plant images, identify possible plant diseases, and access useful information to support crop care.
+Mavuno is an Android-based crop health application that helps users identify plant diseases from leaf images. Users can create an account, scan or upload a plant leaf, view an AI-generated diagnosis, and keep track of previous scans.
 
-The Android application is being developed in **Kotlin** with **Jetpack Compose**. The project is still in progress: the current work focuses on the mobile application and its user interface, while backend integration and the connection to the disease-detection workflow are planned as part of the ongoing group development.
+The project brings together a native Android application, a Django REST API, and a deep-learning image classification model trained on the PlantVillage dataset.
 
-> **Project status:** Work in progress — academic group project. The current Android app includes UI screens and sample plant-scan data. It is not yet connected to a backend or a working disease-detection model, so sample scan information should not be interpreted as live predictions.
+## Features
 
-## Project Goals
+- **User accounts:** Register, log in, refresh authentication sessions, update profile details, and delete an account.
+- **Leaf scanning:** Capture or select a leaf image and submit it for analysis.
+- **AI-powered diagnosis:** Identify the plant and predict whether it is healthy or affected by a disease.
+- **Prediction results:** Display the predicted disease and confidence, together with the model's top predictions.
+- **Scan history:** View previous scans, open individual results, filter healthy or diseased scans, search records, and delete scans.
+- **Crop health information:** Support users in understanding plant health and common crop diseases.
 
-Mavuno is being developed with the following goals:
+## How it works
 
-- Make it easier for users to check the health of their crops using a mobile application.
-- Provide a workflow for capturing or selecting plant images for analysis.
-- Present a result that can distinguish healthy plants from diseased plants and, where supported by the detection model, identify the disease.
-- Keep a history of previous scans.
-- Provide accessible information about common plant diseases and crop care.
+1. A user signs in to the Mavuno Android application.
+2. The user captures or selects an image of a plant leaf.
+3. The Android app uploads the image to the backend API.
+4. The backend preprocesses the image and runs inference using the trained ResNet18 model.
+5. The API returns the diagnosis and top predictions, and saves the scan to the authenticated user's history.
+6. The user can revisit or manage saved scan results in the application.
 
-These describe the intended direction of the project; not all functionality is implemented yet.
-
-## Current Android Application
-
-The current Android client contains the following UI work:
-
-- **Authentication screens:** splash, sign-up, login, email verification, forgot-password, and reset-password screens.
-- **Home dashboard:** crop-health introduction and a recent-scans section populated with local sample data.
-- **Scan history:** sample scan records with healthy/diseased filters.
-- **Plant detail route:** an initial screen for an individual scan result.
-- **Navigation and reusable components:** bottom navigation, dashboard layout, input fields, buttons, scan cards, and settings components.
-- **Theme:** a crop-focused colour system and Material 3 styling.
-
-Some screens are placeholders or are still being implemented. The scan flow, live predictions, and backend-powered data are not complete.
+The model recognises 38 PlantVillage disease/healthy classes, as well as a separate `Not_a_leaf` class used to reject images that are not plant leaves. The backend also applies confidence and image-similarity checks before saving a prediction.
 
 ## Technology Stack
 
-| Area | Technologies |
+| Component | Technologies |
 | --- | --- |
-| Language | Kotlin |
-| Android UI | Jetpack Compose |
-| Design system | Material 3 |
-| Navigation | Navigation Compose |
-| Camera foundation | CameraX |
-| Android libraries | AndroidX Core KTX, Activity Compose, Lifecycle |
-| Build system | Gradle with Kotlin DSL and version catalog |
-| IDE | Android Studio |
+| Android application | Kotlin, Jetpack Compose, Material 3 |
+| Android navigation | Navigation Compose |
+| Camera | CameraX |
+| Networking | Retrofit, OkHttp |
+| Android architecture support | ViewModel, Kotlin Coroutines |
+| Image loading | Coil |
+| Backend | Python, Django, Django REST Framework |
+| Authentication | JSON Web Tokens (JWT) |
+| Machine learning | PyTorch, TorchVision, ResNet18 |
+| Dataset | PlantVillage |
+| Database | SQLite by default; PostgreSQL supported |
+| Backend dependencies | uv |
+| Android build | Gradle with Kotlin DSL |
 
 ## Repository Structure
 
 ```text
 mavuno/
-├── app/
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/com/example/mavuno/
-│   │       │   ├── data/          # Plant models and sample scan data
-│   │       │   ├── ui/
-│   │       │   │   ├── components/ # Reusable Compose components
-│   │       │   │   ├── layouts/    # Shared screen layouts
-│   │       │   │   ├── navigation/ # App navigation
-│   │       │   │   ├── screens/    # Authentication and dashboard screens
-│   │       │   │   └── theme/      # App colours, typography and theme
-│   │       │   └── MainActivity.kt
-│   │       └── res/                # Android resources and image assets
-│   └── build.gradle.kts
-├── gradle/
-│   └── libs.versions.toml
-├── build.gradle.kts
-└── settings.gradle.kts
+├── frontend/                  # Native Android application
+│   ├── app/
+│   │   ├── src/main/
+│   │   │   ├── java/          # Kotlin source code
+│   │   │   └── res/           # Android resources
+│   │   └── build.gradle.kts
+│   ├── gradle/
+│   ├── build.gradle.kts
+│   └── settings.gradle.kts
+│
+├── backend/                   # Django REST API and AI inference
+│   ├── apps/
+│   │   ├── users/             # User account model and migrations
+│   │   └── scans/             # Scan records and migrations
+│   ├── api/v1/
+│   │   ├── users/             # Authentication and profile endpoints
+│   │   └── scans/             # Scan and prediction endpoints
+│   ├── config/                # Django configuration
+│   ├── services/
+│   │   └── ai/                # Model loading, preprocessing and inference
+│   ├── ml_models/             # Model files (downloaded separately)
+│   ├── api.md                 # API reference
+│   ├── manage.py
+│   ├── pyproject.toml
+│   └── .env.example
+│
+└── README.md
 ```
 
 ## Getting Started
 
-### Requirements
+The Android app and backend are separate projects. Set up and run the backend before connecting the Android app to it.
 
-- Android Studio
-- Android SDK matching the project's configured compile SDK (API 37)
-- JDK 11-compatible toolchain
+### Prerequisites
+
+- Android Studio and Android SDK (the project is configured with compile SDK 37)
 - An Android emulator or physical Android device
+- Python 3.10 or later
+- [uv](https://docs.astral.sh/uv/) for Python dependency management
+- Git
 
-### Run the application
+### 1. Clone the repository
 
-1. Clone the repository:
+```bash
+git clone https://github.com/lindaopolo7896/mavuno.git
+cd mavuno
+```
 
-   ```bash
-   git clone https://github.com/lindaopolo7896/mavuno.git
-   cd mavuno
-   ```
+### 2. Set up the backend
 
-2. Open the project directory in Android Studio.
-3. Allow Android Studio to sync the Gradle project and download dependencies.
-4. Select an emulator or connect an Android device.
+```bash
+cd backend
+uv sync
+cp .env.example .env
+```
+
+Open `.env` and set a secure Django `SECRET_KEY`. You can generate one with:
+
+```bash
+uv run python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
+```
+
+Apply database migrations and create an administrator account:
+
+```bash
+uv run python manage.py migrate
+uv run python manage.py createsuperuser
+```
+
+Start the development server:
+
+```bash
+uv run python manage.py runserver 0.0.0.0:8000
+```
+
+The API will be available at `http://127.0.0.1:8000/api/v1/` on the host machine.
+
+#### Machine-learning model files
+
+The trained model weights are not stored in this Git repository. Obtain the model files produced by the training workflow and place them in `backend/ml_models/`:
+
+- `resnet18_v2.pt` — trained ResNet18 weights.
+- `resnet18_v2_check.pt` — class-average and similarity-check data.
+
+The backend's AI configuration points to these filenames by default. If the files are missing, model-based diagnosis will not be available. See [backend/README.md](backend/README.md) for model details and configuration.
+
+### 3. Set up the Android application
+
+1. Open Android Studio.
+2. Choose **Open** and select the repository's `frontend/` directory.
+3. Allow Gradle to sync and download the required dependencies.
+4. Start an Android emulator or connect a device.
 5. Run the `app` configuration.
 
-To build a debug APK from the project root:
+To build a debug APK from the `frontend/` directory:
 
 ```bash
 ./gradlew assembleDebug
 ```
 
-On Windows, use:
+On Windows:
 
 ```powershell
 .\gradlew.bat assembleDebug
 ```
 
-The debug APK is generated under `app/build/outputs/apk/debug/`.
+The APK is generated at `frontend/app/build/outputs/apk/debug/app-debug.apk`.
 
-## Planned Work
+### 4. Connect the Android app to the backend
 
-The group is continuing development. Areas planned for the next stages include:
+For an Android emulator, the host machine's localhost is reachable using `10.0.2.2`. The API documentation uses this local base URL:
 
-- Completing the plant image capture and submission flow.
-- Integrating the backend service with the Android application.
-- Connecting the disease-detection model and displaying its results.
-- Persisting user accounts and scan history through the backend.
-- Completing disease information and recommendations.
-- Testing the end-to-end application workflow.
+```text
+http://10.0.2.2:8000/api/v1/
+```
 
-## Academic Project
+For a physical Android device, use the host computer's reachable local network IP address instead. Ensure the device and computer can communicate and configure the app's API base URL for the environment you are running.
 
-Mavuno is being developed collaboratively as part of a university project. The repository reflects the Android application work currently in progress; backend and model integration are part of the wider team project.
+## API Documentation
+
+The backend exposes a versioned REST API under `/api/v1/`.
+
+The API supports:
+
+- Registration, login, token refresh, and logout.
+- Retrieving, updating, and deleting the authenticated user's profile.
+- Submitting a leaf image for AI diagnosis.
+- Creating, listing, filtering, retrieving, and deleting scan records.
+
+See the detailed [API v1 documentation](backend/api.md) for endpoints, request formats, response examples, and error codes.
+
+## Model and Dataset
+
+Mavuno uses a ResNet18 image classification model trained using the PlantVillage dataset. The model supports 38 plant disease/healthy categories across 14 crops, with an additional `Not_a_leaf` category for rejecting non-leaf images.
+
+The backend performs image preprocessing before inference and can return the top three predictions. Predictions that fail the configured image-recognition or confidence checks are rejected rather than saved as completed scans.
+
+## Project Status
+
+The Mavuno application, backend API, and model-inference workflow have been developed as a completed university group project. The model weight files are maintained separately from this repository and must be supplied locally to run AI diagnosis.
+
+## Contributors
+
+Mavuno was developed collaboratively as a university group project.
 
 ## License
 
